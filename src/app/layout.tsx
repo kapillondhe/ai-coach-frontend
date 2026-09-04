@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { TelemetryInit } from "./telemetry-init";
 
 export const metadata: Metadata = {
   title: "AI Coach",
@@ -11,7 +12,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <TelemetryInit />
+        {children}
+      </body>
     </html>
   );
 }
