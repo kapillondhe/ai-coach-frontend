@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PHOENIX_COLLECTOR_ENDPOINT =
   process.env.PHOENIX_COLLECTOR_ENDPOINT ?? "https://app.phoenix.arize.com";
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const apiKey = process.env.PHOENIX_API_KEY;
   if (!apiKey) {
     return new NextResponse(null, { status: 204 });
@@ -22,4 +22,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   });
 
   return new NextResponse(null, { status: upstream.status });
-}
+};

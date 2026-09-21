@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { streamChatMessage } from "@/lib/api";
 
-type Message = {
+interface Message {
   role: "user" | "assistant";
   content: string;
-};
+}
 
-export default function Home() {
+const Home = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSend() {
+  const handleSend = async () => {
     const message = input.trim();
     if (!message || loading) return;
 
@@ -42,19 +42,19 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSend();
     }
-  }
+  };
 
   return (
     <main className="mx-auto flex h-screen max-w-2xl flex-col p-4">
       <h1 className="mb-4 text-2xl font-semibold">AI Coach</h1>
 
-      <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-black/10 p-4 dark:border-white/10" aria-live="polite">
         {messages.length === 0 && (
           <p className="text-sm text-black/50 dark:text-white/50">
             Send a message to start chatting with the coach.
@@ -93,17 +93,20 @@ export default function Home() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message…"
+          aria-label="Message"
           disabled={loading}
           className="flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-white/10"
         />
         <button
           onClick={handleSend}
           disabled={loading || !input.trim()}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-50"
         >
           Send
         </button>
       </div>
     </main>
   );
-}
+};
+
+export default Home;

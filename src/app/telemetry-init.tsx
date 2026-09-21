@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { initTelemetry } from "@/lib/telemetry";
 
-export function TelemetryInit() {
+export const TelemetryInit = () => {
   useEffect(() => {
     initTelemetry();
   }, []);
 
   return null;
-}
+};

@@ -1,44 +1,28 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const SESSION_ID_KEY = "ai-coach-session-id";
+import { apiFetch, apiFetchJson, getSessionId } from "./client";
 
-function getSessionId(): string {
-  const existing = sessionStorage.getItem(SESSION_ID_KEY);
-  if (existing) return existing;
-
-  const sessionId = crypto.randomUUID();
-  sessionStorage.setItem(SESSION_ID_KEY, sessionId);
-  return sessionId;
-}
-
-export async function sendChatMessage(message: string): Promise<string> {
-  const res = await fetch(`${API_URL}/api/coach/chat`, {
+export const sendChatMessage = async (message: string): Promise<string> => {
+  const data = await apiFetchJson<{ reply: string }>("/api/coach/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, session_id: getSessionId() }),
   });
-
-  if (!res.ok) {
-    throw new Error(`Request failed with status ${res.status}`);
-  }
-
-  const data: { reply: string } = await res.json();
   return data.reply;
-}
+};
 
-export async function streamChatMessage(
+export const streamChatMessage = async (
   message: string,
   onDelta: (delta: string) => void,
   signal?: AbortSignal,
-): Promise<void> {
-  const res = await fetch(`${API_URL}/api/coach/chat/stream`, {
+): Promise<void> => {
+  const res = await apiFetch("/api/coach/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, session_id: getSessionId() }),
     signal,
   });
 
-  if (!res.ok || !res.body) {
-    throw new Error(`Request failed with status ${res.status}`);
+  if (!res.body) {
+    throw new Error("Response body missing for stream request");
   }
 
   const reader = res.body.getReader();
@@ -73,4 +57,4 @@ export async function streamChatMessage(
       if (parsed.delta) onDelta(parsed.delta);
     }
   }
-}
+};

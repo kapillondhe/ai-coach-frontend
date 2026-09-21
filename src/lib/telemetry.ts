@@ -9,7 +9,7 @@ import {
 
 let initialized = false;
 
-export function initTelemetry(): void {
+export const initTelemetry = (): void => {
   if (initialized) return;
   initialized = true;
 
@@ -36,4 +36,4 @@ export function initTelemetry(): void {
       }),
     ],
   });
-}
+};
