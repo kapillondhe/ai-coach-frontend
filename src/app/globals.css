@@ -1,24 +1,109 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens per docs/ui-ux-design.md ("Color and type", "Theming").
+ * Light is the default; dark applies via `prefers-color-scheme` until
+ * Profile → Appearance (task 04) adds a manual override, at which point
+ * that control should just set `document.documentElement.dataset.theme`
+ * to "light" | "dark" — the `html[data-theme]` rules below already take
+ * priority over the media query for that.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f0efeb;
+  --border: #e2e0d9;
+  --ink: #1e1e1c;
+  --ink-muted: #6b6a63;
+  --accent: #3c6e5e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4eee9;
+  --danger: #b3432f;
+
+  /* discipline colors — always paired with an icon/label, never color-only
+     (see docs/ui-ux-design.md → Accessibility) */
+  --swim: #3c6ea5;
+  --bike: #a97e2e;
+  --run: #a15a45;
+
+  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+html[data-theme="dark"] {
+  --bg: #15171a;
+  --surface: #1c1f22;
+  --surface-2: #23272a;
+  --border: #33383c;
+  --ink: #ececea;
+  --ink-muted: #9a9d9c;
+  --accent: #6fb49b;
+  --accent-ink: #0e1613;
+  --accent-soft: #20302b;
+  --danger: #d97a63;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html:not([data-theme]) {
+    --bg: #15171a;
+    --surface: #1c1f22;
+    --surface-2: #23272a;
+    --border: #33383c;
+    --ink: #ececea;
+    --ink-muted: #9a9d9c;
+    --accent: #6fb49b;
+    --accent-ink: #0e1613;
+    --accent-soft: #20302b;
+    --danger: #d97a63;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-swim: var(--swim);
+  --color-bike: var(--bike);
+  --color-run: var(--run);
+  --font-sans: var(--font-sans);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* Visible, uniform focus ring — see docs/ui-ux-design.md → Accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Utility other components consult instead of hard-coding a media query,
+   per docs/tasks/06-frontend-foundations.md */
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-only {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

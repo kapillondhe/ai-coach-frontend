@@ -1,51 +1,33 @@
 "use client";
 
-import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useSignInModal } from "@/lib/sign-in-modal-context";
 
-export const SignInControl = () => {
-  const { session, loading, signInWithOtp, signInWithGoogle, signOut } =
-    useAuth();
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+interface SignInControlProps {
+  compact?: boolean;
+}
 
-  const handleGoogleClick = async () => {
-    const { error } = await signInWithGoogle();
-    if (error) {
-      setStatus("error");
-      setErrorMessage(error);
-    }
-  };
+export const SignInControl = ({ compact = false }: SignInControlProps = {}) => {
+  const { session, loading, signOut } = useAuth();
+  const { openModal } = useSignInModal();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || status === "sending") return;
-    setStatus("sending");
-    setErrorMessage(null);
-    const { error } = await signInWithOtp(email.trim());
-    if (error) {
-      setStatus("error");
-      setErrorMessage(error);
-      return;
-    }
-    setStatus("sent");
-  };
+  const layout = compact
+    ? "flex flex-col items-stretch gap-2"
+    : "flex items-center gap-2";
 
   if (loading) return null;
 
   if (session) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <span className="hidden text-black/50 sm:inline dark:text-white/50">
+      <div className={layout}>
+        <span
+          className={`truncate text-[13px] text-ink-muted ${compact ? "" : "hidden sm:inline"}`}
+        >
           {session.user.email}
         </span>
         <button
           onClick={() => signOut()}
-          className="rounded-md px-3 py-1.5 font-medium text-black/60 hover:bg-black/5 dark:text-white/60 dark:hover:bg-white/10"
+          className="min-h-9 rounded-md px-3 py-1.5 text-left text-[13px] font-semibold text-ink-muted hover:bg-surface-2"
         >
           Sign out
         </button>
@@ -53,75 +35,14 @@ export const SignInControl = () => {
     );
   }
 
-  if (!open) {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleGoogleClick}
-          className="rounded-md border border-black/10 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-black/5 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
-        >
-          Continue with Google
-        </button>
-        <button
-          onClick={() => setOpen(true)}
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white"
-        >
-          Sign in
-        </button>
-        {status === "error" && (
-          <span className="text-xs text-red-600" aria-live="polite">
-            {errorMessage}
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  if (status === "sent") {
-    return (
-      <p className="text-sm text-black/60 dark:text-white/60">
-        Check {email} for a sign-in link.
-      </p>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-2">
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          autoComplete="email"
-          aria-describedby={status === "error" ? "signin-error" : undefined}
-          disabled={status === "sending"}
-          className="w-40 rounded-md border border-black/10 px-2 py-1.5 text-sm outline-none focus:border-blue-500 dark:border-white/10 sm:w-56"
-        />
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {status === "sending" ? "Sending…" : "Send link"}
-        </button>
-      </form>
+    <div className={layout}>
       <button
-        onClick={handleGoogleClick}
-        className="rounded-md border border-black/10 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-black/5 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+        onClick={openModal}
+        className="min-h-9 rounded-md bg-accent px-3 py-1.5 text-[13px] font-semibold text-accent-ink"
       >
-        Continue with Google
+        Sign in
       </button>
-      {status === "error" && (
-        <span
-          id="signin-error"
-          className="text-xs text-red-600"
-          aria-live="polite"
-        >
-          {errorMessage}
-        </span>
-      )}
     </div>
   );
 };
