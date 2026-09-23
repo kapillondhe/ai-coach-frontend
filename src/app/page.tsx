@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { streamChatMessage } from "@/lib/api";
 import { ChatOpener } from "./components/chat/ChatOpener";
 import { ChatInputBar } from "./components/chat/ChatInputBar";
@@ -14,10 +14,21 @@ const ChatPage = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const sendText = async (text: string) => {
     const message = text.trim();
     if (!message || loading) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setMessages((prev) => [
       ...prev,
@@ -29,19 +40,27 @@ const ChatPage = () => {
     setError(null);
 
     try {
-      await streamChatMessage(message, (delta) => {
-        setMessages((prev) => {
-          const next = [...prev];
-          const last = next[next.length - 1];
-          next[next.length - 1] = { ...last, content: last.content + delta };
-          return next;
-        });
-      });
-    } catch {
+      await streamChatMessage(
+        message,
+        (delta) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            next[next.length - 1] = { ...last, content: last.content + delta };
+            return next;
+          });
+        },
+        controller.signal,
+      );
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError("Failed to reach the coach API. Is the backend reachable?");
       setMessages((prev) => prev.slice(0, -1));
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) {
+        setLoading(false);
+        abortRef.current = null;
+      }
     }
   };
 

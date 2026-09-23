@@ -29,6 +29,7 @@ export const CorosConnectionRow = () => {
   const [state, setState] = useState<ConnectionState>("loading");
 
   useEffect(() => {
+    const controller = new AbortController();
     let cancelled = false;
 
     const run = async () => {
@@ -49,11 +50,12 @@ export const CorosConnectionRow = () => {
       }
 
       try {
-        const status = await getCorosStatus();
+        const status = await getCorosStatus(controller.signal);
         if (!cancelled) {
           setState(status.connected ? "connected" : "not_connected");
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         if (!cancelled) setState("error");
       }
     };
@@ -62,6 +64,7 @@ export const CorosConnectionRow = () => {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 

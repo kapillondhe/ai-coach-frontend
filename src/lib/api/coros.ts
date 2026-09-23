@@ -5,8 +5,8 @@ export interface CorosStatus {
   connected_at: string | null;
 }
 
-export const getCorosStatus = (): Promise<CorosStatus> =>
-  apiFetchJson<CorosStatus>("/api/integrations/coros/status");
+export const getCorosStatus = (signal?: AbortSignal): Promise<CorosStatus> =>
+  apiFetchJson<CorosStatus>("/api/integrations/coros/status", { signal });
 
 export const startCorosConnect = async (): Promise<void> => {
   const data = await apiFetchJson<{ authorization_url: string }>(

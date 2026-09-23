@@ -1,13 +1,5 @@
 @import "tailwindcss";
 
-/*
- * Design tokens per docs/ui-ux-design.md ("Color and type", "Theming").
- * Light is the default; dark applies via `prefers-color-scheme` until
- * Profile → Appearance (task 04) adds a manual override, at which point
- * that control should just set `document.documentElement.dataset.theme`
- * to "light" | "dark" — the `html[data-theme]` rules below already take
- * priority over the media query for that.
- */
 :root {
   --bg: #f7f6f3;
   --surface: #ffffff;
@@ -20,13 +12,12 @@
   --accent-soft: #e4eee9;
   --danger: #b3432f;
 
-  /* discipline colors — always paired with an icon/label, never color-only
-     (see docs/ui-ux-design.md → Accessibility) */
   --swim: #3c6ea5;
   --bike: #a97e2e;
   --run: #a15a45;
 
-  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans:
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 html[data-theme="dark"] {
@@ -40,21 +31,6 @@ html[data-theme="dark"] {
   --accent-ink: #0e1613;
   --accent-soft: #20302b;
   --danger: #d97a63;
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) {
-    --bg: #15171a;
-    --surface: #1c1f22;
-    --surface-2: #23272a;
-    --border: #33383c;
-    --ink: #ececea;
-    --ink-muted: #9a9d9c;
-    --accent: #6fb49b;
-    --accent-ink: #0e1613;
-    --accent-soft: #20302b;
-    --danger: #d97a63;
-  }
 }
 
 @theme inline {
@@ -80,15 +56,12 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Visible, uniform focus ring — see docs/ui-ux-design.md → Accessibility */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Utility other components consult instead of hard-coding a media query,
-   per docs/tasks/06-frontend-foundations.md */
 @media (prefers-reduced-motion: reduce) {
   .motion-safe-only {
     animation: none !important;
