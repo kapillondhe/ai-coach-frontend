@@ -12,7 +12,7 @@ export const NavShell = ({ children }: { children: React.ReactNode }) => {
       </div>
       <div className="flex min-h-screen flex-1 flex-col">
         <MobileSignInBar />
-        <div className="min-h-0 flex-1">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
         <div className="lg:hidden">
           <BottomNavBar />
         </div>
