@@ -1,5 +1,7 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { GroundingPill } from "./GroundingPill";
 import { SourcePill } from "./SourcePill";
@@ -10,6 +12,80 @@ export interface ChatMessage {
   groundingLabel?: string;
   sourceLabel?: string;
 }
+
+const MarkdownContent = ({ content }: { content: string }) => (
+  <ReactMarkdown
+    remarkPlugins={[remarkGfm]}
+    components={{
+      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+      ul: ({ children }) => (
+        <ul className="mb-2 list-disc space-y-0.5 pl-5 last:mb-0">
+          {children}
+        </ul>
+      ),
+      ol: ({ children }) => (
+        <ol className="mb-2 list-decimal space-y-0.5 pl-5 last:mb-0">
+          {children}
+        </ol>
+      ),
+      strong: ({ children }) => (
+        <strong className="font-semibold text-ink">{children}</strong>
+      ),
+      a: ({ children, href }) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="text-accent underline underline-offset-2"
+        >
+          {children}
+        </a>
+      ),
+      code: ({ children }) => (
+        <code className="rounded bg-surface-2 px-1 py-0.5 text-[13px]">
+          {children}
+        </code>
+      ),
+      table: ({ children }) => (
+        <div className="mb-2 overflow-x-auto last:mb-0">
+          <table className="w-full border-collapse text-[13.5px]">
+            {children}
+          </table>
+        </div>
+      ),
+      thead: ({ children }) => (
+        <thead className="border-b border-border text-left">
+          {children}
+        </thead>
+      ),
+      th: ({ children }) => (
+        <th className="px-2 py-1 font-semibold text-ink">{children}</th>
+      ),
+      td: ({ children }) => (
+        <td className="border-t border-border px-2 py-1 align-top">
+          {children}
+        </td>
+      ),
+      h1: ({ children }) => (
+        <h3 className="mb-1.5 text-[15px] font-semibold text-ink">
+          {children}
+        </h3>
+      ),
+      h2: ({ children }) => (
+        <h3 className="mb-1.5 text-[15px] font-semibold text-ink">
+          {children}
+        </h3>
+      ),
+      h3: ({ children }) => (
+        <h3 className="mb-1.5 text-[14.5px] font-semibold text-ink">
+          {children}
+        </h3>
+      ),
+    }}
+  >
+    {content}
+  </ReactMarkdown>
+);
 
 export const MessageBubble = ({
   message,
@@ -35,7 +111,7 @@ export const MessageBubble = ({
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[92%] whitespace-pre-wrap text-[14.5px] leading-relaxed text-ink">
+      <div className="max-w-[92%] text-[14.5px] leading-relaxed text-ink">
         {showPulse ? (
           <span
             className="motion-safe-only inline-block h-4 w-4 animate-pulse rounded-full bg-surface-2"
@@ -43,7 +119,7 @@ export const MessageBubble = ({
           />
         ) : (
           <>
-            {message.content}
+            <MarkdownContent content={message.content} />
             {showCursor && (
               <span
                 className="motion-safe-only ml-0.5 animate-pulse"

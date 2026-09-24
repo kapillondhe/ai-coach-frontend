@@ -1,60 +1,55 @@
-import { apiFetch, apiFetchJson, getSessionId } from "./client";
+import { apiFetch, getSessionId } from "./client";
+import { readSse } from "./sse";
 
-export const sendChatMessage = async (message: string): Promise<string> => {
-  const data = await apiFetchJson<{ reply: string }>("/api/coach/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, session_id: getSessionId() }),
-  });
-  return data.reply;
-};
+export interface ChatHistoryTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+interface StreamChatOptions {
+  history?: ChatHistoryTurn[];
+  conversationId?: string | null;
+  onDelta: (delta: string) => void;
+  onConversationId?: (conversationId: string) => void;
+  signal?: AbortSignal;
+}
 
 export const streamChatMessage = async (
   message: string,
-  onDelta: (delta: string) => void,
-  signal?: AbortSignal,
+  options: StreamChatOptions,
 ): Promise<void> => {
+  const { history, conversationId, onDelta, onConversationId, signal } =
+    options;
+
   const res = await apiFetch("/api/coach/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, session_id: getSessionId() }),
+    body: JSON.stringify({
+      message,
+      session_id: getSessionId(),
+      history: history ?? [],
+      conversation_id: conversationId ?? null,
+    }),
     signal,
   });
 
-  if (!res.body) {
-    throw new Error("Response body missing for stream request");
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const events = buffer.split("\n\n");
-    buffer = events.pop() ?? "";
-
-    for (const rawEvent of events) {
-      let eventType = "message";
-      let data = "";
-      for (const line of rawEvent.split("\n")) {
-        if (line.startsWith("event:")) {
-          eventType = line.slice(6).trim();
-        } else if (line.startsWith("data:")) {
-          data += line.slice(5).trim();
-        }
+  for await (const { event, data } of readSse(res)) {
+    switch (event) {
+      case "done":
+        return;
+      case "error": {
+        const parsed: { detail?: string; message?: string } = JSON.parse(data);
+        throw new Error(parsed.detail ?? parsed.message ?? "Stream error");
       }
-      if (!data) continue;
-      if (eventType === "done") return;
-      if (eventType === "error") {
-        const parsed: { message?: string } = JSON.parse(data);
-        throw new Error(parsed.message ?? "Stream error");
+      case "conversation": {
+        const parsed: { conversation_id?: string } = JSON.parse(data);
+        if (parsed.conversation_id) onConversationId?.(parsed.conversation_id);
+        break;
       }
-      const parsed: { delta?: string } = JSON.parse(data);
-      if (parsed.delta) onDelta(parsed.delta);
+      default: {
+        const parsed: { delta?: string } = JSON.parse(data);
+        if (parsed.delta) onDelta(parsed.delta);
+      }
     }
   }
 };
