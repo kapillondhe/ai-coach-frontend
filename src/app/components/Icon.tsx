@@ -1,6 +1,5 @@
 export const ICONS = {
   chat: "/icons/chat.svg",
-  plan: "/icons/plan.svg",
   dashboard: "/icons/dashboard.svg",
   profile: "/icons/profile.svg",
   send: "/icons/send.svg",
