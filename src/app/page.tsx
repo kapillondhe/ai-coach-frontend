@@ -9,6 +9,7 @@ import { ChatInputBar } from "./components/chat/ChatInputBar";
 import { MessageBubble } from "./components/chat/MessageBubble";
 import { ConversationHistoryButton } from "./components/chat/ConversationHistoryButton";
 import { Icon } from "./components/Icon";
+import { Tooltip } from "./components/Tooltip";
 
 const ChatPage = () => {
   const { session } = useAuth();
@@ -35,19 +36,21 @@ const ChatPage = () => {
     () =>
       isSignedIn ? (
         <>
-          <button
-            type="button"
-            onClick={newChat}
-            disabled={messages.length === 0}
-            aria-label="New chat"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink disabled:opacity-40"
-          >
-            <Icon
-              name="plus"
-              className="h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </button>
+          <Tooltip label="New chat">
+            <button
+              type="button"
+              onClick={newChat}
+              disabled={messages.length === 0}
+              aria-label="New chat"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink disabled:opacity-40"
+            >
+              <Icon
+                name="plus"
+                className="h-[18px] w-[18px]"
+                aria-hidden="true"
+              />
+            </button>
+          </Tooltip>
           <ConversationHistoryButton
             activeConversationId={conversationId}
             onSelect={openConversation}

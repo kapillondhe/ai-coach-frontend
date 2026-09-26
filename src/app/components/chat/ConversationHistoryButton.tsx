@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { listConversations, deleteConversation, ApiError } from "@/lib/api";
 import type { ConversationSummary } from "@/lib/api";
 import { Icon } from "../Icon";
+import { Tooltip } from "../Tooltip";
 
 interface ConversationHistoryButtonProps {
   activeConversationId: string | null;
@@ -92,17 +93,19 @@ export const ConversationHistoryButton = ({
 
   return (
     <div ref={containerRef} className="relative">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={toggleOpen}
-        aria-haspopup="true"
-        aria-expanded={open}
-        aria-label="Conversation history"
-        className="flex min-h-9 min-w-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink"
-      >
-        <Icon name="history" className="h-[18px] w-[18px]" aria-hidden="true" />
-      </button>
+      <Tooltip label="Conversation history">
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={toggleOpen}
+          aria-haspopup="true"
+          aria-expanded={open}
+          aria-label="Conversation history"
+          className="flex min-h-9 min-w-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink"
+        >
+          <Icon name="history" className="h-[18px] w-[18px]" aria-hidden="true" />
+        </button>
+      </Tooltip>
       {open && (
         <div
           role="menu"
