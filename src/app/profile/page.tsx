@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useSignInModal } from "@/lib/sign-in-modal-context";
 import { SignInControl } from "../components/SignInControl";
 import { ProfileFields } from "./ProfileFields";
+import { MemorySection } from "./MemorySection";
 import { ConnectionsSection } from "./ConnectionsSection";
 import { AppearanceControl } from "./AppearanceControl";
 
@@ -28,6 +29,16 @@ const ProfilePage = () => {
                   You
                 </h2>
                 <ProfileFields />
+              </section>
+
+              <section>
+                <h2 className="mb-1 text-sm font-semibold text-ink-muted">
+                  Memory
+                </h2>
+                <p className="mb-2 text-xs text-ink-muted">
+                  Facts the coach remembers about you across conversations.
+                </p>
+                <MemorySection />
               </section>
 
               <section>

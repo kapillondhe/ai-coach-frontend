@@ -1,20 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { streamChatMessage } from "@/lib/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { streamChatMessage, getConversation } from "@/lib/api";
 import type { ChatMessage } from "@/app/components/chat/MessageBubble";
 
 export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+
+  const setConversation = (id: string | null) => {
+    conversationIdRef.current = id;
+    setConversationId(id);
+  };
 
   const wasSignedInRef = useRef(isSignedIn);
   useEffect(() => {
     if (!wasSignedInRef.current && isSignedIn) {
-      conversationIdRef.current = null;
+      setConversation(null);
       setMessages([]);
     }
     wasSignedInRef.current = isSignedIn;
@@ -24,6 +30,35 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
     return () => {
       abortRef.current?.abort();
     };
+  }, []);
+
+  const newChat = useCallback(() => {
+    abortRef.current?.abort();
+    setConversation(null);
+    setMessages([]);
+    setError(null);
+  }, []);
+
+  const forgetConversation = useCallback(
+    (id: string) => {
+      if (id === conversationIdRef.current) newChat();
+    },
+    [newChat],
+  );
+
+  const openConversation = useCallback(async (id: string) => {
+    if (id === conversationIdRef.current) return;
+    abortRef.current?.abort();
+    setError(null);
+    try {
+      const data = await getConversation(id);
+      setConversation(data.id);
+      setMessages(
+        data.messages.map((m) => ({ role: m.role, content: m.content })),
+      );
+    } catch {
+      setError("Failed to load that conversation.");
+    }
   }, []);
 
   const send = async (text: string) => {
@@ -50,8 +85,8 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
           ? undefined
           : priorTurns.map((m) => ({ role: m.role, content: m.content })),
         conversationId: isSignedIn ? conversationIdRef.current : undefined,
-        onConversationId: (conversationId) => {
-          conversationIdRef.current = conversationId;
+        onConversationId: (id) => {
+          setConversation(id);
         },
         onDelta: (delta) => {
           setMessages((prev) => {
@@ -75,5 +110,14 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
     }
   };
 
-  return { messages, loading, error, send };
+  return {
+    messages,
+    loading,
+    error,
+    send,
+    conversationId,
+    newChat,
+    openConversation,
+    forgetConversation,
+  };
 };

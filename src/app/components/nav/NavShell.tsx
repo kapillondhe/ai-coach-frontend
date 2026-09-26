@@ -6,13 +6,15 @@ import { MobileSignInBar } from "./MobileSignInBar";
 
 export const NavShell = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex h-screen flex-col lg:flex-row">
       <div className="hidden lg:block">
         <RailNav />
       </div>
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <MobileSignInBar />
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          {children}
+        </div>
         <div className="lg:hidden">
           <BottomNavBar />
         </div>

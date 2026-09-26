@@ -6,6 +6,7 @@ import { NavShell } from "./components/nav/NavShell";
 import { SignInModal } from "./components/SignInModal";
 import { AuthProvider } from "@/lib/auth-context";
 import { SignInModalProvider } from "@/lib/sign-in-modal-context";
+import { HeaderActionsProvider } from "@/lib/header-actions-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { THEME_COOKIE_KEY, isStoredTheme } from "@/lib/theme";
 
@@ -29,7 +30,9 @@ const RootLayout = async ({
         <AuthProvider>
           <ThemeProvider initialTheme={theme}>
             <SignInModalProvider>
-              <NavShell>{children}</NavShell>
+              <HeaderActionsProvider>
+                <NavShell>{children}</NavShell>
+              </HeaderActionsProvider>
               <SignInModal />
             </SignInModalProvider>
           </ThemeProvider>

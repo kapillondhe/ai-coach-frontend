@@ -5,6 +5,9 @@ export const ICONS = {
   send: "/icons/send.svg",
   grounding: "/icons/grounding.svg",
   source: "/icons/source.svg",
+  history: "/icons/history.svg",
+  plus: "/icons/plus.svg",
+  trash: "/icons/trash.svg",
 } as const;
 
 export type IconName = keyof typeof ICONS;
