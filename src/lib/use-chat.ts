@@ -96,6 +96,14 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
             return next;
           });
         },
+        onSuggestions: (suggestions) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            next[next.length - 1] = { ...last, suggestions };
+            return next;
+          });
+        },
         signal: controller.signal,
       });
     } catch (err) {

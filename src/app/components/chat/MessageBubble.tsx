@@ -11,6 +11,7 @@ export interface ChatMessage {
   content: string;
   groundingLabel?: string;
   sourceLabel?: string;
+  suggestions?: string[];
 }
 
 const MarkdownContent = ({ content }: { content: string }) => (
@@ -90,9 +91,11 @@ const MarkdownContent = ({ content }: { content: string }) => (
 export const MessageBubble = ({
   message,
   isStreaming,
+  onSuggestionSelect,
 }: {
   message: ChatMessage;
   isStreaming: boolean;
+  onSuggestionSelect?: (text: string) => void;
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -136,6 +139,20 @@ export const MessageBubble = ({
               <GroundingPill label={message.groundingLabel} />
             )}
             {message.sourceLabel && <SourcePill label={message.sourceLabel} />}
+          </div>
+        )}
+        {!isStreaming && message.suggestions && message.suggestions.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {message.suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => onSuggestionSelect?.(suggestion)}
+                className="min-h-8 rounded-full border border-border bg-surface px-3 py-1.5 text-[12.5px] font-semibold text-ink hover:border-accent hover:text-accent"
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
         )}
       </div>

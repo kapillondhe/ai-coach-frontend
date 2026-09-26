@@ -86,6 +86,11 @@ const ChatPage = () => {
             isStreaming={
               loading && i === messages.length - 1 && m.role === "assistant"
             }
+            onSuggestionSelect={
+              i === messages.length - 1 && m.role === "assistant" && !loading
+                ? sendText
+                : undefined
+            }
           />
         ))}
         {error && (

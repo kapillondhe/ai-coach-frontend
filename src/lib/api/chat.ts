@@ -11,6 +11,7 @@ interface StreamChatOptions {
   conversationId?: string | null;
   onDelta: (delta: string) => void;
   onConversationId?: (conversationId: string) => void;
+  onSuggestions?: (suggestions: string[]) => void;
   signal?: AbortSignal;
 }
 
@@ -18,7 +19,7 @@ export const streamChatMessage = async (
   message: string,
   options: StreamChatOptions,
 ): Promise<void> => {
-  const { history, conversationId, onDelta, onConversationId, signal } =
+  const { history, conversationId, onDelta, onConversationId, onSuggestions, signal } =
     options;
 
   const res = await apiFetch("/api/coach/chat/stream", {
@@ -44,6 +45,11 @@ export const streamChatMessage = async (
       case "conversation": {
         const parsed: { conversation_id?: string } = JSON.parse(data);
         if (parsed.conversation_id) onConversationId?.(parsed.conversation_id);
+        break;
+      }
+      case "suggestions": {
+        const parsed: { suggestions?: string[] } = JSON.parse(data);
+        if (parsed.suggestions) onSuggestions?.(parsed.suggestions);
         break;
       }
       default: {
