@@ -117,9 +117,18 @@ export const MessageBubble = ({
       <div className="max-w-[92%] text-[14.5px] leading-relaxed text-ink">
         {showPulse ? (
           <span
-            className="motion-safe-only inline-block h-4 w-4 animate-pulse rounded-full bg-surface-2"
-            aria-hidden="true"
-          />
+            className="flex items-center gap-1 py-1"
+            role="status"
+            aria-label="Coach is typing"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="motion-safe-only h-2 w-2 animate-bounce rounded-full bg-ink-muted"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </span>
         ) : (
           <>
             <MarkdownContent content={message.content} />
