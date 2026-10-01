@@ -30,7 +30,7 @@ export const ChatInputBar = ({
           placeholder="Ask your coach anything…"
           aria-label="Message"
           disabled={disabled}
-          className="min-h-9 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-muted"
+          className="min-h-9 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-muted sm:text-[13.5px]"
         />
         <button
           type="button"

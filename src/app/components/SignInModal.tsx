@@ -115,7 +115,7 @@ export const SignInModal = () => {
                   status === "error" ? "signin-error" : undefined
                 }
                 disabled={status === "sending"}
-                className="min-h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-accent"
+                className="min-h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-ink outline-none focus:border-accent sm:text-[13px]"
               />
               <button
                 type="submit"
