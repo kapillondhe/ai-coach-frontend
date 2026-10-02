@@ -31,10 +31,14 @@ export const ChatOpener = ({ onChipSelect }: ChatOpenerProps) => {
   if (loading) {
     return (
       <div aria-hidden="true" className="flex flex-col gap-3 px-1 pb-2 pt-1">
-        <div className="h-4 w-48 animate-pulse rounded bg-surface-2 motion-safe-only" />
+        <div>
+          <div className="mb-1.5 h-4 w-10 animate-pulse rounded bg-surface-2 motion-safe-only" />
+          <div className="h-[25px] w-3/4 animate-pulse rounded bg-surface-2 motion-safe-only" />
+        </div>
         <div className="flex flex-wrap gap-2">
+          <div className="h-9 w-44 animate-pulse rounded-full bg-surface-2 motion-safe-only" />
+          <div className="h-9 w-52 animate-pulse rounded-full bg-surface-2 motion-safe-only" />
           <div className="h-9 w-40 animate-pulse rounded-full bg-surface-2 motion-safe-only" />
-          <div className="h-9 w-32 animate-pulse rounded-full bg-surface-2 motion-safe-only" />
         </div>
       </div>
     );

@@ -4,6 +4,19 @@ import { useEffect, useState } from "react";
 import { listMemories, deleteMemory, type MemoryData } from "@/lib/api";
 import { Icon } from "../components/Icon";
 
+export const MemorySkeleton = () => (
+  <div
+      aria-hidden="true"
+      className="divide-y divide-border rounded-lg border border-border px-4"
+    >
+      {[0, 1].map((i) => (
+        <div key={i} className="flex min-h-11 items-center gap-4 py-3">
+          <span className="h-4 w-full animate-pulse rounded bg-surface-2 motion-safe-only" />
+        </div>
+      ))}
+    </div>
+);
+
 export const MemorySection = () => {
   const [memories, setMemories] = useState<MemoryData[] | null>(null);
   const [error, setError] = useState(false);
@@ -45,20 +58,7 @@ export const MemorySection = () => {
     );
   }
 
-  if (memories === null) {
-    return (
-      <div
-        aria-hidden="true"
-        className="divide-y divide-border rounded-lg border border-border px-4"
-      >
-        {[0, 1].map((i) => (
-          <div key={i} className="flex min-h-11 items-center gap-4 py-3">
-            <span className="h-4 w-full animate-pulse rounded bg-surface-2 motion-safe-only" />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (memories === null) return <MemorySkeleton />;
 
   if (memories.length === 0) {
     return (

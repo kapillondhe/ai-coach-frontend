@@ -12,7 +12,7 @@ import { Icon } from "./components/Icon";
 import { Tooltip } from "./components/Tooltip";
 
 const ChatPage = () => {
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
   const isSignedIn = !!session;
   const {
     messages,
@@ -72,8 +72,8 @@ const ChatPage = () => {
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[680px] flex-1 flex-col">
-      {isSignedIn && (
-        <div className="hidden items-center justify-end gap-1 px-4 pt-2 lg:flex">
+      {(isSignedIn || authLoading) && (
+        <div className="hidden min-h-11 items-center justify-end gap-1 px-4 pt-2 lg:flex">
           {chatActions}
         </div>
       )}

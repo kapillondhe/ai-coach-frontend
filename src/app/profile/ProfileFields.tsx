@@ -28,6 +28,25 @@ const FIELDS: FieldConfig[] = [
   },
 ];
 
+export const ProfileFieldsSkeleton = () => (
+  <div
+      aria-hidden="true"
+      className="divide-y divide-border rounded-lg border border-border px-4"
+    >
+      {FIELDS.map((field) => (
+        <div
+          key={field.key}
+          className="flex min-h-11 items-center justify-between gap-4 py-3"
+        >
+          <span className="text-[13px] font-medium text-ink-muted/40">
+            {field.label}
+          </span>
+          <span className="h-4 w-16 animate-pulse rounded bg-surface-2 motion-safe-only" />
+        </div>
+      ))}
+    </div>
+);
+
 export const ProfileFields = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,26 +79,7 @@ export const ProfileFields = () => {
     setProfile(updated);
   };
 
-  if (loading) {
-    return (
-      <div
-        aria-hidden="true"
-        className="divide-y divide-border rounded-lg border border-border px-4"
-      >
-        {FIELDS.map((field) => (
-          <div
-            key={field.key}
-            className="flex min-h-11 items-center justify-between gap-4 py-3"
-          >
-            <span className="text-[13px] font-medium text-ink-muted/40">
-              {field.label}
-            </span>
-            <span className="h-4 w-16 animate-pulse rounded bg-surface-2 motion-safe-only" />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (loading) return <ProfileFieldsSkeleton />;
 
   if (error || !profile) {
     return (

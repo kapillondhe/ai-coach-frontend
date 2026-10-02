@@ -15,7 +15,7 @@ export const SignInControl = ({ compact = false }: SignInControlProps = {}) => {
     ? "flex flex-col items-stretch gap-2"
     : "flex items-center gap-2";
 
-  if (loading) return null;
+  if (loading) return <div aria-hidden="true" className="h-9" />;
 
   if (session) {
     return (
