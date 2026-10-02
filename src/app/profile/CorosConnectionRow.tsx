@@ -92,7 +92,13 @@ export const CorosConnectionRow = () => {
       <div>
         <p className="text-sm font-medium text-ink">COROS</p>
         <p
-          className={`text-xs ${state === "error" ? "text-danger" : "text-ink-muted"}`}
+          className={`text-xs ${
+            state === "error"
+              ? "text-danger"
+              : state === "connected" || state === "syncing"
+                ? "text-accent"
+                : "text-ink-muted"
+          }`}
           aria-live="polite"
         >
           {state === "loading" && "Checking connection…"}
