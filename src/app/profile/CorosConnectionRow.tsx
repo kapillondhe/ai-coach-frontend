@@ -90,9 +90,9 @@ export const CorosConnectionRow = () => {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <div>
-        <p className="text-sm font-medium">COROS</p>
+        <p className="text-sm font-medium text-ink">COROS</p>
         <p
-          className="text-xs text-black/50 dark:text-white/50"
+          className={`text-xs ${state === "error" ? "text-danger" : "text-ink-muted"}`}
           aria-live="polite"
         >
           {state === "loading" && "Checking connection…"}
@@ -110,7 +110,7 @@ export const CorosConnectionRow = () => {
         <button
           onClick={handleConnect}
           disabled={state === "connecting"}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-accent-ink disabled:opacity-50"
         >
           {state === "connecting" ? "Connecting…" : "Connect"}
         </button>
@@ -119,7 +119,7 @@ export const CorosConnectionRow = () => {
       {(state === "syncing" || state === "connected") && (
         <button
           onClick={handleDisconnect}
-          className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-black/5 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-muted hover:bg-surface-2"
         >
           Disconnect
         </button>
