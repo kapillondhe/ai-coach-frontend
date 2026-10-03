@@ -11,6 +11,7 @@ export const ICONS = {
   copy: "/icons/copy.svg",
   check: "/icons/check.svg",
   stop: "/icons/stop.svg",
+  mic: "/icons/mic.svg",
   arrowDown: "/icons/arrow-down.svg",
   refresh: "/icons/refresh.svg",
 } as const;
