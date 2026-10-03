@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { GroundingPill } from "./GroundingPill";
 import { SourcePill } from "./SourcePill";
+import { Icon } from "../Icon";
+import { Tooltip } from "../Tooltip";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -88,6 +91,37 @@ const MarkdownContent = ({ content }: { content: string }) => (
   </ReactMarkdown>
 );
 
+const CopyButton = ({ content }: { content: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard access denied or unavailable; no-op
+    }
+  };
+
+  return (
+    <Tooltip label={copied ? "Copied" : "Copy"}>
+      <button
+        type="button"
+        onClick={handleCopy}
+        aria-label="Copy message"
+        className="flex h-7 w-7 items-center justify-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink"
+      >
+        <Icon
+          name={copied ? "check" : "copy"}
+          className="h-3.5 w-3.5"
+          aria-hidden="true"
+        />
+      </button>
+    </Tooltip>
+  );
+};
+
 export const MessageBubble = ({
   message,
   isStreaming,
@@ -113,7 +147,7 @@ export const MessageBubble = ({
   const showPulse = isStreaming && !message.content;
 
   return (
-    <div className="flex justify-start">
+    <div className="group flex justify-start">
       <div className="max-w-[92%] text-[14.5px] leading-relaxed text-ink">
         {showPulse ? (
           <span
@@ -157,11 +191,17 @@ export const MessageBubble = ({
                 key={suggestion}
                 type="button"
                 onClick={() => onSuggestionSelect?.(suggestion)}
-                className="min-h-8 rounded-full border border-border bg-surface px-3 py-1.5 text-[12.5px] font-semibold text-ink hover:border-accent hover:text-accent"
+                disabled={!onSuggestionSelect}
+                className="min-h-8 rounded-full border border-border bg-surface px-3 py-1.5 text-[12.5px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
               >
                 {suggestion}
               </button>
             ))}
+          </div>
+        )}
+        {!isStreaming && message.content && (
+          <div className="mt-1 opacity-60 transition-opacity hover:opacity-100 focus-within:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+            <CopyButton content={message.content} />
           </div>
         )}
       </div>

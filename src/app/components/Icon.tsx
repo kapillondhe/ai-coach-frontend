@@ -8,6 +8,11 @@ export const ICONS = {
   history: "/icons/history.svg",
   plus: "/icons/plus.svg",
   trash: "/icons/trash.svg",
+  copy: "/icons/copy.svg",
+  check: "/icons/check.svg",
+  stop: "/icons/stop.svg",
+  arrowDown: "/icons/arrow-down.svg",
+  refresh: "/icons/refresh.svg",
 } as const;
 
 export type IconName = keyof typeof ICONS;

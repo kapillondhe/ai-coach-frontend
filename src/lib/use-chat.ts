@@ -11,6 +11,7 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const lastMessageRef = useRef<string | null>(null);
 
   const setConversation = (id: string | null) => {
     conversationIdRef.current = id;
@@ -68,6 +69,7 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    lastMessageRef.current = message;
 
     const priorTurns = messages;
 
@@ -118,11 +120,31 @@ export const useChat = ({ isSignedIn }: { isSignedIn: boolean }) => {
     }
   };
 
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setLoading(false);
+  }, []);
+
+  const retry = useCallback(() => {
+    if (!lastMessageRef.current || loading) return;
+    const message = lastMessageRef.current;
+    setMessages((prev) =>
+      prev.length && prev[prev.length - 1].role === "user"
+        ? prev.slice(0, -1)
+        : prev,
+    );
+    send(message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   return {
     messages,
     loading,
     error,
     send,
+    stop,
+    retry,
     conversationId,
     newChat,
     openConversation,

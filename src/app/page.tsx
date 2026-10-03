@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useChat } from "@/lib/use-chat";
 import { usePageHeaderActions } from "@/lib/header-actions-context";
@@ -19,6 +19,8 @@ const ChatPage = () => {
     loading,
     error,
     send,
+    stop,
+    retry,
     conversationId,
     newChat,
     openConversation,
@@ -26,9 +28,42 @@ const ChatPage = () => {
   } = useChat({ isSignedIn });
   const [input, setInput] = useState("");
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+  const [showJumpToBottom, setShowJumpToBottom] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const distanceFromBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight;
+      const atBottom = distanceFromBottom < 80;
+      stickToBottomRef.current = atBottom;
+      setShowJumpToBottom(!atBottom && el.scrollHeight > el.clientHeight + 80);
+    };
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (stickToBottomRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      setShowJumpToBottom(false);
+    }
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    stickToBottomRef.current = true;
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    setShowJumpToBottom(false);
+  };
+
   const sendText = async (text: string) => {
     if (!text.trim() || loading) return;
     setInput("");
+    stickToBottomRef.current = true;
     await send(text);
   };
 
@@ -77,33 +112,61 @@ const ChatPage = () => {
           {chatActions}
         </div>
       )}
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 pt-4">
-        {messages.length === 0 && <ChatOpener onChipSelect={sendText} />}
-        {messages.map((m, i) => (
-          <MessageBubble
-            key={i}
-            message={m}
-            isStreaming={
-              loading && i === messages.length - 1 && m.role === "assistant"
-            }
-            onSuggestionSelect={
-              i === messages.length - 1 && m.role === "assistant" && !loading
-                ? sendText
-                : undefined
-            }
-          />
-        ))}
-        {error && (
-          <p className="text-[13px] text-danger" role="alert">
-            {error}
-          </p>
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollRef}
+          className="h-full space-y-4 overflow-y-auto px-4 pb-4 pt-4"
+        >
+          {messages.length === 0 && <ChatOpener onChipSelect={sendText} />}
+          {messages.map((m, i) => (
+            <MessageBubble
+              key={i}
+              message={m}
+              isStreaming={
+                loading && i === messages.length - 1 && m.role === "assistant"
+              }
+              onSuggestionSelect={
+                i === messages.length - 1 && m.role === "assistant" && !loading
+                  ? sendText
+                  : undefined
+              }
+            />
+          ))}
+          {error && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2">
+              <p className="text-[13px] text-danger" role="alert">
+                {error}
+              </p>
+              <button
+                type="button"
+                onClick={retry}
+                aria-label="Retry last message"
+                className="flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-[12.5px] font-semibold text-danger hover:bg-danger/10"
+              >
+                <Icon name="refresh" className="h-3.5 w-3.5" aria-hidden="true" />
+                Retry
+              </button>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+        {showJumpToBottom && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            aria-label="Scroll to latest message"
+            className="absolute bottom-3 left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-surface text-ink shadow-md hover:bg-surface-2"
+          >
+            <Icon name="arrowDown" className="h-4 w-4" aria-hidden="true" />
+          </button>
         )}
       </div>
       <ChatInputBar
         value={input}
         onChange={setInput}
         onSend={() => sendText(input)}
-        disabled={loading}
+        onStop={stop}
+        loading={loading}
       />
     </div>
   );
