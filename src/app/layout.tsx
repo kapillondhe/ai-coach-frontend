@@ -11,6 +11,8 @@ import { SignInModalProvider } from "@/lib/sign-in-modal-context";
 import { HeaderActionsProvider } from "@/lib/header-actions-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { THEME_COOKIE_KEY, isStoredTheme } from "@/lib/theme";
+import { FaviconProvider } from "@/lib/favicon-context";
+import { FaviconManager } from "./components/FaviconManager";
 
 export const metadata: Metadata = {
   title: "AI Coach",
@@ -31,12 +33,15 @@ const RootLayout = async ({
         <TelemetryInit />
         <AuthProvider>
           <ThemeProvider initialTheme={theme}>
-            <SignInModalProvider>
-              <HeaderActionsProvider>
-                <NavShell>{children}</NavShell>
-              </HeaderActionsProvider>
-              <SignInModal />
-            </SignInModalProvider>
+            <FaviconProvider>
+              <FaviconManager />
+              <SignInModalProvider>
+                <HeaderActionsProvider>
+                  <NavShell>{children}</NavShell>
+                </HeaderActionsProvider>
+                <SignInModal />
+              </SignInModalProvider>
+            </FaviconProvider>
           </ThemeProvider>
         </AuthProvider>
         <Analytics />

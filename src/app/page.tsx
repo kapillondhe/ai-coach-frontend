@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useChat } from "@/lib/use-chat";
 import { usePageHeaderActions } from "@/lib/header-actions-context";
+import { useFaviconState } from "@/lib/favicon-context";
 import { ChatOpener } from "./components/chat/ChatOpener";
 import { ChatInputBar } from "./components/chat/ChatInputBar";
 import { MessageBubble } from "./components/chat/MessageBubble";
@@ -27,6 +28,20 @@ const ChatPage = () => {
     forgetConversation,
   } = useChat({ isSignedIn });
   const [input, setInput] = useState("");
+  const { setFaviconState } = useFaviconState();
+  const wasLoadingRef = useRef(false);
+
+  useEffect(() => {
+    if (loading) {
+      setFaviconState("loading");
+      wasLoadingRef.current = true;
+      return;
+    }
+    if (wasLoadingRef.current) {
+      wasLoadingRef.current = false;
+      setFaviconState(document.hidden ? "unread" : "idle");
+    }
+  }, [loading, setFaviconState]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
