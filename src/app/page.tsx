@@ -19,6 +19,7 @@ const ChatPage = () => {
     messages,
     loading,
     error,
+    cooldownSeconds,
     send,
     stop,
     retry,
@@ -76,7 +77,7 @@ const ChatPage = () => {
   };
 
   const sendText = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || cooldownSeconds) return;
     setInput("");
     stickToBottomRef.current = true;
     await send(text);
@@ -155,8 +156,9 @@ const ChatPage = () => {
               <button
                 type="button"
                 onClick={retry}
+                disabled={!!cooldownSeconds}
                 aria-label="Retry last message"
-                className="flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-[12.5px] font-semibold text-danger hover:bg-danger/10"
+                className="flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-[12.5px] font-semibold text-danger hover:bg-danger/10 disabled:opacity-50"
               >
                 <Icon name="refresh" className="h-3.5 w-3.5" aria-hidden="true" />
                 Retry
@@ -182,6 +184,7 @@ const ChatPage = () => {
         onSend={() => sendText(input)}
         onStop={stop}
         loading={loading}
+        disabled={!!cooldownSeconds}
       />
     </div>
   );

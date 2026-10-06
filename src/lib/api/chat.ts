@@ -6,6 +6,35 @@ export interface ChatHistoryTurn {
   content: string;
 }
 
+// Mirror the backend's ChatRequest limits in app/api/routes/coach.py
+// (_MAX_MESSAGE_CHARS / _MAX_HISTORY_TURNS / _MAX_HISTORY_TURN_CHARS).
+export const MAX_MESSAGE_CHARS = 4000;
+export const MAX_HISTORY_TURNS = 50;
+export const MAX_HISTORY_TURN_CHARS = 8000;
+
+// Only sent for anonymous users (signed-in users send `conversation_id` and
+// the server loads their history instead). Keeps the last MAX_HISTORY_TURNS
+// turns, trimmed so the window starts on a "user" turn (so the model never
+// sees a dangling assistant reply first), with each turn's content capped
+// and any non-user/assistant or empty-placeholder turns dropped.
+export const boundHistoryForAnonymous = (
+  history: ChatHistoryTurn[],
+): ChatHistoryTurn[] => {
+  const usable = history.filter(
+    (turn) =>
+      (turn.role === "user" || turn.role === "assistant") &&
+      turn.content.length > 0,
+  );
+  let windowed = usable.slice(-MAX_HISTORY_TURNS);
+  if (windowed.length > 0 && windowed[0].role !== "user") {
+    windowed = windowed.slice(1);
+  }
+  return windowed.map((turn) => ({
+    role: turn.role,
+    content: turn.content.slice(0, MAX_HISTORY_TURN_CHARS),
+  }));
+};
+
 interface StreamChatOptions {
   history?: ChatHistoryTurn[];
   conversationId?: string | null;
@@ -28,7 +57,7 @@ export const streamChatMessage = async (
     body: JSON.stringify({
       message,
       session_id: getSessionId(),
-      history: history ?? [],
+      history: history ? boundHistoryForAnonymous(history) : [],
       conversation_id: conversationId ?? null,
     }),
     signal,

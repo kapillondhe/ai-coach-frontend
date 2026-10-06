@@ -52,7 +52,13 @@ export const CorosConnectionRow = () => {
       try {
         const status = await getCorosStatus(controller.signal);
         if (!cancelled) {
-          setState(status.connected ? "connected" : "not_connected");
+          setState(
+            !status.connected
+              ? "not_connected"
+              : status.syncing
+                ? "syncing"
+                : "connected",
+          );
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;

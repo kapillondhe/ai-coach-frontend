@@ -3,13 +3,26 @@ import { supabase } from "@/lib/supabase";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const SESSION_ID_KEY = "ai-coach-session-id";
 
+export type ApiErrorDetail =
+  | string
+  | { loc: (string | number)[]; msg: string; type: string }[];
+
 export class ApiError extends Error {
   readonly status: number;
+  readonly detail?: ApiErrorDetail;
+  readonly retryAfterSeconds?: number | null;
 
-  constructor(status: number, message?: string) {
+  constructor(
+    status: number,
+    message?: string,
+    detail?: ApiErrorDetail,
+    retryAfterSeconds?: number | null,
+  ) {
     super(message ?? `Request failed with status ${status}`);
     this.name = "ApiError";
     this.status = status;
+    this.detail = detail;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -36,7 +49,28 @@ export const apiFetch = async (
     ...init,
     headers: { ...(await authHeaders()), ...init.headers },
   });
-  if (!res.ok) throw new ApiError(res.status);
+  if (!res.ok) {
+    let detail: ApiErrorDetail | undefined;
+    try {
+      const body = await res.json();
+      if (typeof body?.detail === "string" || Array.isArray(body?.detail)) {
+        detail = body.detail;
+      }
+    } catch {
+      // Body wasn't JSON (or was empty) — leave detail undefined.
+    }
+    const retryAfterRaw = res.headers.get("Retry-After");
+    const retryAfterParsed = retryAfterRaw ? Number(retryAfterRaw) : NaN;
+    const retryAfterSeconds = Number.isFinite(retryAfterParsed)
+      ? retryAfterParsed
+      : null;
+    throw new ApiError(
+      res.status,
+      typeof detail === "string" ? detail : undefined,
+      detail,
+      retryAfterSeconds,
+    );
+  }
   return res;
 };
 

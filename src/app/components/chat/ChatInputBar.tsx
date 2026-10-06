@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
+import { MAX_MESSAGE_CHARS } from "@/lib/api";
 
 interface ChatInputBarProps {
   value: string;
@@ -9,9 +10,11 @@ interface ChatInputBarProps {
   onSend: () => void;
   onStop?: () => void;
   loading: boolean;
+  disabled?: boolean;
 }
 
 const MAX_HEIGHT_PX = 160;
+const COUNTER_THRESHOLD = 3500;
 
 export const ChatInputBar = ({
   value,
@@ -19,6 +22,7 @@ export const ChatInputBar = ({
   onSend,
   onStop,
   loading,
+  disabled = false,
 }: ChatInputBarProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -80,7 +84,7 @@ export const ChatInputBar = ({
       }
       const prefix = baseValueRef.current;
       const joiner = prefix && !prefix.endsWith(" ") ? " " : "";
-      onChange(`${prefix}${joiner}${transcript}`);
+      onChange(`${prefix}${joiner}${transcript}`.slice(0, MAX_MESSAGE_CHARS));
     };
 
     recognition.onerror = () => {
@@ -116,26 +120,43 @@ export const ChatInputBar = ({
     }
   };
 
+  const remaining = MAX_MESSAGE_CHARS - value.length;
+  const showCounter = remaining <= MAX_MESSAGE_CHARS - COUNTER_THRESHOLD;
+
   return (
     <div className="sticky bottom-0 bg-gradient-to-t from-bg from-60% to-transparent px-4 pb-4 pt-2">
       <div className="mx-auto flex max-w-[680px] items-end gap-2 rounded-3xl border border-border bg-surface py-1.5 pl-4 pr-1.5 shadow-sm">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask your coach anything…"
-          aria-label="Message"
-          rows={1}
-          className="min-h-9 flex-1 resize-none overflow-y-auto bg-transparent py-2 text-base leading-snug text-ink outline-none placeholder:text-ink-muted sm:text-[13.5px]"
-        />
+        <div className="flex min-h-9 flex-1 flex-col">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value.slice(0, MAX_MESSAGE_CHARS))}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask your coach anything…"
+            aria-label="Message"
+            rows={1}
+            maxLength={MAX_MESSAGE_CHARS}
+            disabled={disabled}
+            className="min-h-9 flex-1 resize-none overflow-y-auto bg-transparent py-2 text-base leading-snug text-ink outline-none placeholder:text-ink-muted disabled:opacity-60 sm:text-[13.5px]"
+          />
+          {showCounter && (
+            <span
+              className={`self-end pb-1 text-[11px] ${
+                remaining < 0 ? "text-danger" : "text-ink-muted"
+              }`}
+            >
+              {value.length.toLocaleString()}/{MAX_MESSAGE_CHARS.toLocaleString()}
+            </span>
+          )}
+        </div>
         {speechSupported && (
           <button
             type="button"
             onClick={toggleRecording}
+            disabled={disabled}
             aria-label={isRecording ? "Stop voice input" : "Start voice input"}
             aria-pressed={isRecording}
-            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full disabled:opacity-50 ${
               isRecording
                 ? "bg-danger/10 text-danger"
                 : "text-ink-muted hover:bg-surface-2 hover:text-ink"
@@ -161,7 +182,7 @@ export const ChatInputBar = ({
           <button
             type="button"
             onClick={handleSend}
-            disabled={!value.trim()}
+            disabled={disabled || !value.trim()}
             aria-label="Send message"
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-accent text-accent-ink disabled:opacity-50"
           >

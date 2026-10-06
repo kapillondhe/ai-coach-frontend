@@ -3,6 +3,8 @@ import { apiFetch, apiFetchJson } from "./client";
 export interface CorosStatus {
   connected: boolean;
   connected_at: string | null;
+  syncing: boolean;
+  last_synced_at: string | null;
 }
 
 export const getCorosStatus = (signal?: AbortSignal): Promise<CorosStatus> =>

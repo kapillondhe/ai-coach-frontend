@@ -1,5 +1,6 @@
 export { ApiError } from "./client";
-export { streamChatMessage } from "./chat";
+export type { ApiErrorDetail } from "./client";
+export { streamChatMessage, MAX_MESSAGE_CHARS } from "./chat";
 export type { ChatHistoryTurn } from "./chat";
 export { getCorosStatus, startCorosConnect, disconnectCoros } from "./coros";
 export type { CorosStatus } from "./coros";
