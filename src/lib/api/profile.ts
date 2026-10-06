@@ -1,17 +1,14 @@
 import { apiFetchJson } from "./client";
 
-export type Theme = "light" | "dark";
-
 export interface ProfileData {
   name: string | null;
   weight_kg: number | null;
   injury_notes: string | null;
-  theme: Theme;
   field_sources: Record<string, "chat" | "user">;
 }
 
 export type ProfileUpdate = Partial<
-  Pick<ProfileData, "name" | "weight_kg" | "injury_notes" | "theme">
+  Pick<ProfileData, "name" | "weight_kg" | "injury_notes">
 >;
 
 export const getProfile = (signal?: AbortSignal): Promise<ProfileData> =>
